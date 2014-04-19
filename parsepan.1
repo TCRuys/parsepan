@@ -1,0 +1,289 @@
+.\" ---------------------------------------------------------------
+.\"   parsepan.1 - documentation for parsepan (started: 7 Jan 2013)
+.\" ---------------------------------------------------------------
+.\"
+.\" The macros "Of", "Ss" and "Se" are copied from man2html.1.
+.\" The macros "EX" and "EE" are copied from awk.1.
+.\"
+.\" ---------------------------------------------------------------
+.\" OPTION FLAG MACRO           .Of -x [arg]
+.de Of
+.ie \\n(.$==1      \%[\|\fB\\$1\fR\|]
+.el .if \\n(.$==2  \%[\|\fB\\$1\fR\0\fI\fI\\$2\fR\|]
+..
+.\" ---------------------------------------------------------------
+.\" OPTION FLAG MACRO           .Xy -x --y
+.de Xy
+\%[\|\fB\\$1\fR,\0\fB\\$2\fR\|]
+..
+.\" ---------------------------------------------------------------
+.\" OPTION FLAG MACRO           .Xy -x --y arg
+.de Yz
+\%[\|\fB\\$1\fR,\0\fB\\$2\fR\0\fI\\$3\fR\|]
+..
+.\" ---------------------------------------------------------------
+.\" SYNOPSIS START MACRO        .Ss name
+.de Ss
+.na
+.nr aA \w\\$1\\0u
+.in +\\n(aAu
+'ti -\\n(aAu
+.ta  \\n(aAu
+\&\fB\\$1\fR\t\c
+..
+.\" ---------------------------------------------------------------
+.\" SYNOPSIS END MACRO          .Se
+.de Se
+.ad
+.in
+..
+.\" ---------------------------------------------------------------
+.\" EXAMPLE MACRO               .EX
+.de EX
+.nf
+.ft CW
+..
+.\" ---------------------------------------------------------------
+.\" EXAMPLE EXPLANATION         .EE
+.de EE
+.br
+.fi
+.ft 1
+..
+.\" ---------------------------------------------------------------
+.\"
+.TH parsepan 1 "19 April 2014" "parsepan 0.9" "User Commands"
+.nh \" disable hyphenation
+.\"
+.\"------------------------------------
+.SH NAME
+\fBparsepan\fR - script to parse SPIN verification reports 
+.\"
+.\"------------------------------------
+.SH SYNOPSIS
+.Ss parsepan\0 
+.Of options...
+\0[\fI\0pan_verification_report(s)\0\fR]
+.Se
+.sp
+or more specifically:
+.sp
+.Ss parsepan 
+.Xy -h --help
+.Xy -a --allnames
+.Yz -d --delimiter {c|t|=}
+.Yz -k --keyfile key_file
+.Xy -l --lines
+.Xy -q --quotes
+.Xy -s --summary
+.Xy -t --header
+.Xy -v --version
+.Xy -x --debug
+[\fI\0pan_verification_report(s)\0\fR]
+.Se
+.\"------------------------------------
+.SH DESCRIPTION
+.na
+.B parsepan 
+is a script to parse the results of SPIN's pan verifier. 
+.B parsepan 
+writes the information as data values to the standard output. 
+In its default setting, all data values found are written on a single line 
+delimited by tabs. The format of the ouptut can be customized through 
+several options. Apart from SPIN's standard verification report, 
+.B parsepan 
+recognizes the output added by the 
+.B runspin 
+script.
+If no input files are specified on the command-line, the input is read
+from the standard input.
+
+.B parsepan
+makes it easy to collect specific information from SPIN's verification 
+reports and to export a comma separated values (csv) file, which can
+be imported into analysis software such as a spreadsheet.
+In connection with runspin, 
+.B parsepan 
+can serve as unit test tool for Promela specifications.
+
+To identify parts of the verification report, 
+.B parsepan
+uses names for specific items in the report, e.g., state_vector,
+errors, atomic_steps, etc.
+A verification report can thus be seen as a list of
+.I (key,value)
+pairs, where 
+.I key
+is the name of the item, and
+.I value
+is the specific value as found in the verification report.
+
+When multiple verification reports are specified (or when the input
+is the standard input), 
+.B parsepan 
+will print the values of each 
+report on a separate line. 
+.B parsepan 
+will use the first verification
+report as reference point: for all subsequent verification reports
+only the items as found on the first report will be included (and
+in the same order). For missing items, a dash "-" will be included. 
+This means that all 
+.I columns
+of the different lines (the rows) will correspond with the same 
+.I key.
+.\"
+.\"------------------------------------
+.SH OPTIONS
+.TP
+.BR -h ",  " --help
+Prints the synopsis of the script and the possibly options.
+.TP
+.BR -a ",  " --allnames
+The script dumps all 
+.I key
+names that are recognized by parsepan. This list can serve as a starting
+point to build a custom 
+.I keyfile
+(see below), to specify the keys that one is interested in.
+.TP
+.BR -d ",  " --delimiter\0 "c | t | ="
+Specifies the delimiter between the data values. 
+Only three possible delimiters are currently supported.
+The character
+.I c
+corresponds with the comma, the character
+.I t
+corresponds with the tab character, and the character
+.I =
+is simply the equal sign. 
+By default, the delimiter is a tab.
+.TP
+.B -k ",  " --keyfile\0\fIkeyfile\fR
+By default, parsepan will output 
+.I all
+values that it finds in the verification report.
+One is usually only interested in a subset of these values.
+When using this option, parsepan will only report on the 
+values of the keys that are in the
+.I keyfile.
+parsepan will respect the order of the keys in the
+.I keyfile\fR,
+when printing the values.
+.TP
+.BR -l ",  " --lines
+Instead of printing all values on a single line, this option will
+dump all 
+.I (key,value)
+pairs to the standard output; each pair will be printed on a 
+single line, and the
+.I key
+and 
+.I value
+will be delimited by an equal sign (=).
+.TP
+.BR -q ",  " --quotes
+This option will make sure that all values that are being printed
+will be enclosed in double quotes. This is useful when the output of 
+parsepan (e.g., csv format) is used as input for a third party 
+program (e.g., a spreadsheet) that requires quoted values.
+.TP
+.BR -s ",  " --summary
+Prints a very concise summary of the verification report.
+It only prints the values for the following keys:
+.I rs_promela_file, rs_config_name, errors, states_stored, state_vector.
+This is useful when parsepan is used as unit test tool.
+.TP
+.BR -t ",  " --header
+Includes all 
+.I key
+names as a header row before the first line of values.
+This is useful when exporting the results to a third party program.
+.TP
+.BR -v ",  " --version
+Prints the version number of parsepan and exits.
+.TP
+.BR -x ",  " --debug
+The debug option will print all non-empty lines in the verification
+report that parsepan did not recognize. This option was useful in 
+identifying all lines that can be printed by a pan verifier.
+.\"
+.\"------------------------------------
+.SH EXAMPLES
+.\"
+.TP
+.EX
+runspin -p -n deadlock peterson.prom | parsepan --header --delimiter c
+.EE
+The Promela model \fIpeterson.prom\fR is verified according to 
+configuration \fIdeadlock\fR. The verification reports are fed to
+parsepan, which shows all data values on a single line, headed by the
+names of the keys. The (abbreviated) output would look like this:
+.\"
+
+.EX
+rs_promela_file,rs_verification_date,rs_spin_version, ... 
+peterson.prom,16-Apr-2014 13:00:00,Spin Version 6.2.7 -- 2 March 2014, ...
+.EE
+.\"
+.TP
+.EX 
+runspin -a -p peterson.prom | parsepan --summary
+.EE
+First all configurations found in \fIpeterson.prom\fR
+are verified. The output of these verification reports is read
+by parsepan, which then reports a summary of the verification 
+reports:
+.\"
+
+.EX 
+peterson.prom   deadlock    0   32  20
+peterson.prom   mutex       0   32  36
+peterson.prom   progress    0   62  36
+.EE
+.\"
+.\"------------------------------------
+.SH DEPENDENCIES
+parsepan is a Python script and (apart from SPIN and optionally
+runspin) it only requires Python to be installed.
+.\"------------------------------------
+.SH FILES
+runspin.sh - the \fBrunspin\fR shell script
+.br
+runspin.cfgs - sample file with configurations
+.br
+.\"
+.\"------------------------------------
+.SH ADDITIONAL NOTES
+To automate the verification process with SPIN there is also an utility
+called \fBrunspin\fR, which has been developed hand-in-hand with 
+\fBparsepan\fR. \fBparsepan\fR recognizes the information added by the
+\fBrunspin\fR script.
+.\"
+.\"------------------------------------
+.\" .SH BUGS
+.\" Not yet known.
+.\"
+.\"------------------------------------
+.SH SEE ALSO
+spin(1) -- SPIN website: http://www.spinroot.com
+.br
+runspin(1) -- automatically verify Promela models
+.\"
+.\"------------------------------------
+.SH HISTORY
+\fBparsepan\fR is (loosely) based on the perl script \fBppr\fR 
+(parse pan reports) which was developed in 2000/2001. Its purpose 
+was to batch process SPIN verification reports. 
+\fBppr\fR has been used extensively for the experiments in [Ruys 2001].
+.\"
+.\"------------------------------------
+.SH VERSION
+This documentation describes the first public version of \fBparsepan\fR: 
+version 0.9 (19-Apr-2014).
+.\"
+.\"------------------------------------
+.SH AUTHOR
+SPIN is developed by Gerard J. Holzmann (http://spinroot.com/).
+.br
+The parsepan script is written by Theo Ruys (theo dot ruys at gmail dot com).

@@ -1,0 +1,197 @@
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<head>
+  <style type="text/css"> 
+    h2 { font-size: 100% }
+  </style>
+</head>
+<body>
+
+<PRE>
+<!-- Manpage converted by man2html 3.0.1 -->
+<B>parsepan(1)</B>                      User Commands                     <B>parsepan(1)</B>
+
+
+
+
+</PRE>
+<H2>NAME</H2><PRE>
+       <B>parsepan</B> - script to parse SPIN verification reports
+
+
+</PRE>
+<H2>SYNOPSIS</H2><PRE>
+       <B>parsepan</B>  [<B>options...</B>]  [ <I>pan</I><B>_</B><I>verification</I><B>_</B><I>report(s)</I> ]
+
+       or more specifically:
+
+       <B>parsepan</B> [<B>-h</B>, <B>--help</B>] [<B>-a</B>, <B>--allnames</B>] [<B>-d</B>, <B>--delimiter</B> <I>{c|t|=}</I>]
+                [<B>-k</B>, <B>--keyfile</B> <I>key</I><B>_</B><I>file</I>] [<B>-l</B>, <B>--lines</B>] [<B>-q</B>, <B>--quotes</B>]
+                [<B>-s</B>, <B>--summary</B>] [<B>-t</B>, <B>--header</B>] [<B>-v</B>, <B>--version</B>] [<B>-x</B>, <B>--debug</B>]
+                [ <I>pan</I><B>_</B><I>verification</I><B>_</B><I>report(s)</I> ]
+
+
+</PRE>
+<H2>DESCRIPTION</H2><PRE>
+       <B>parsepan</B> is a script to parse the results of SPIN's pan verifier.
+       <B>parsepan</B> writes the information as data values to the standard output.
+       In its default setting, all data values found are written on a single
+       line delimited by tabs. The format of the ouptut can be customized
+       through several options. Apart from SPIN's standard verification
+       report, <B>parsepan</B> recognizes the output added by the <B>runspin</B> script.  If
+       no input files are specified on the command-line, the input is read
+       from the standard input.
+
+       <B>parsepan</B> makes it easy to collect specific information from SPIN's
+       verification reports and to export a comma separated values (csv) file,
+       which can be imported into analysis software such as a spreadsheet.  In
+       connection with runspin, <B>parsepan</B> can serve as unit test tool for
+       Promela specifications.
+
+       To identify parts of the verification report, <B>parsepan</B> uses names for
+       specific items in the report, e.g., state_vector, errors, atomic_steps,
+       etc.  A verification report can thus be seen as a list of <I>(key,value)</I>
+       pairs, where <I>key</I> is the name of the item, and <I>value</I> is the specific
+       value as found in the verification report.
+
+       When multiple verification reports are specified (or when the input is
+       the standard input), <B>parsepan</B> will print the values of each report on a
+       separate line.  <B>parsepan</B> will use the first verification report as
+       reference point: for all subsequent verification reports only the items
+       as found on the first report will be included (and in the same order).
+       For missing items, a dash "-" will be included.  This means that all
+       <I>columns</I> of the different lines (the rows) will correspond with the same
+       <I>key.</I>
+
+
+</PRE>
+<H2>OPTIONS</H2><PRE>
+       <B>-h</B>,  <B>--help</B>
+              Prints the synopsis of the script and the possibly options.
+
+       <B>-a</B>,  <B>--allnames</B>
+              The script dumps all <I>key</I> names that are recognized by parsepan.
+              This list can serve as a starting point to build a custom
+              <I>keyfile</I> (see below), to specify the keys that one is interested
+              in.
+
+       <B>-d</B>,  <B>--delimiter</B> c | t | =
+              Specifies the delimiter between the data values.  Only three
+              possible delimiters are currently supported.  The character <I>c</I>
+              corresponds with the comma, the character <I>t</I> corresponds with the
+              tab character, and the character <I>=</I> is simply the equal sign.  By
+              default, the delimiter is a tab.
+
+       <B>-k</B> <B>,</B>   <B>--keyfile</B> <I>keyfile</I>
+              By default, parsepan will output <I>all</I> values that it finds in the
+              verification report.  One is usually only interested in a subset
+              of these values.  When using this option, parsepan will only
+              report on the values of the keys that are in the <I>keyfile.</I>
+              parsepan will respect the order of the keys in the <I>keyfile</I>, when
+              printing the values.
+
+       <B>-l</B>,  <B>--lines</B>
+              Instead of printing all values on a single line, this option
+              will dump all <I>(key,value)</I> pairs to the standard output; each
+              pair will be printed on a single line, and the <I>key</I> and <I>value</I>
+              will be delimited by an equal sign (=).
+
+       <B>-q</B>,  <B>--quotes</B>
+              This option will make sure that all values that are being
+              printed will be enclosed in double quotes. This is useful when
+              the output of parsepan (e.g., csv format) is used as input for a
+              third party program (e.g., a spreadsheet) that requires quoted
+              values.
+
+       <B>-s</B>,  <B>--summary</B>
+              Prints a very concise summary of the verification report.  It
+              only prints the values for the following keys: <I>rs</I><B>_</B><I>promela</I><B>_</B><I>file,</I>
+              <I>rs</I><B>_</B><I>config</I><B>_</B><I>name,</I> <I>errors,</I> <I>states</I><B>_</B><I>stored,</I> <I>state</I><B>_</B><I>vector.</I>  This is
+              useful when parsepan is used as unit test tool.
+
+       <B>-t</B>,  <B>--header</B>
+              Includes all <I>key</I> names as a header row before the first line of
+              values.  This is useful when exporting the results to a third
+              party program.
+
+       <B>-v</B>,  <B>--version</B>
+              Prints the version number of parsepan and exits.
+
+       <B>-x</B>,  <B>--debug</B>
+              The debug option will print all non-empty lines in the
+              verification report that parsepan did not recognize. This option
+              was useful in identifying all lines that can be printed by a pan
+              verifier.
+
+
+</PRE>
+<H2>EXAMPLES</H2><PRE>
+       runspin -p -n deadlock peterson.prom | parsepan --header --delimiter c
+              The Promela model <I>peterson.prom</I> is verified according to
+              configuration <I>deadlock</I>. The verification reports are fed to
+              parsepan, which shows all data values on a single line, headed
+              by the names of the keys. The (abbreviated) output would look
+              like this:
+
+              rs_promela_file,rs_verification_date,rs_spin_version, ...
+              peterson.prom,16-Apr-2014 13:00:00,Spin Version 6.2.7 -- 2 March 2014, ...
+
+       runspin -a -p peterson.prom | parsepan --summary
+              First all configurations found in <I>peterson.prom</I> are verified.
+              The output of these verification reports is read by parsepan,
+              which then reports a summary of the verification reports:
+
+              peterson.prom   deadlock    0   32  20
+              peterson.prom   mutex       0   32  36
+              peterson.prom   progress    0   62  36
+
+
+</PRE>
+<H2>DEPENDENCIES</H2><PRE>
+       parsepan is a Python script and (apart from SPIN and optionally
+       runspin) it only requires Python to be installed.
+
+
+</PRE>
+<H2>FILES</H2><PRE>
+       runspin.sh - the <B>runspin</B> shell script
+       runspin.cfgs - sample file with configurations
+
+
+</PRE>
+<H2>ADDITIONAL NOTES</H2><PRE>
+       To automate the verification process with SPIN there is also an utility
+       called <B>runspin</B>, which has been developed hand-in-hand with <B>parsepan</B>.
+       <B>parsepan</B> recognizes the information added by the <B>runspin</B> script.
+
+
+</PRE>
+<H2>SEE ALSO</H2><PRE>
+       <B>spin(1)</B> -- SPIN website: http://www.spinroot.com
+       <B>runspin(1)</B> -- automatically verify Promela models
+
+
+</PRE>
+<H2>HISTORY</H2><PRE>
+       <B>parsepan</B> is (loosely) based on the perl script <B>ppr</B> (parse pan reports)
+       which was developed in 2000/2001. Its purpose was to batch process SPIN
+       verification reports.  <B>ppr</B> has been used extensively for the
+       experiments in [Ruys 2001].
+
+
+</PRE>
+<H2>VERSION</H2><PRE>
+       This documentation describes the first public version of <B>parsepan</B>:
+       version 0.9 (19-Apr-2014).
+
+
+</PRE>
+<H2>AUTHOR</H2><PRE>
+       SPIN is developed by Gerard J. Holzmann (http://spinroot.com/).
+       The parsepan script is written by Theo Ruys (theo dot ruys at gmail dot
+       com).
+
+
+
+parsepan 0.9                     19 April 2014                     <B>parsepan(1)</B>
+</PRE>
+</body>
